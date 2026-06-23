@@ -114,6 +114,9 @@ img { max-width: 100%; display: block; }
   .site-nav { display: none; }
   .site-header .bar { gap: 1rem; }
   .menu-toggle { display: inline-flex; }
+  /* .site-nav's margin-left:auto normally pushes the actions right; it's hidden
+     here, so push the actions cluster right explicitly. */
+  .header-actions { margin-left: auto; }
 }
 
 /* ---- Mobile drawer (slides in from the right) ---- */
