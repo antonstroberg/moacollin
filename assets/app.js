@@ -275,8 +275,14 @@
         '<a class="btn btn-primary sm booknav" href="' + '/#boka' + '">' + esc(t.bookBtn) + '</a>' +
         '<button type="button" class="menu-toggle" aria-label="' + (LANG === 'sv' ? 'Öppna meny' : 'Open menu') + '" aria-expanded="false" aria-controls="site-drawer">' + ICON_MENU + '</button>' +
       '</div>' +
-    '</div>' +
-    '<div class="drawer-overlay" data-drawer-close></div>' +
+    '</div>';
+  }
+
+  // The drawer is rendered into a body-level root (not the header) so its
+  // position:fixed layout isn't trapped by the header's backdrop-filter, which
+  // would otherwise clamp the overlay/drawer to the header's box.
+  function drawerHTML(t, activeKey) {
+    return '<div class="drawer-overlay" data-drawer-close></div>' +
     '<aside class="drawer" id="site-drawer" aria-label="Meny" aria-hidden="true">' +
       '<div class="drawer-top">' +
         '<a class="brand" href="/" aria-label="Moa Collin">' + logo('ink', 'md') + '</a>' +
@@ -556,6 +562,16 @@
     if (main && PAGES[page]) main.innerHTML = PAGES[page](t);
     if (footer) footer.innerHTML = footerHTML(t);
 
+    // Drawer lives at body level (outside the backdrop-filtered header) so its
+    // fixed positioning fills the viewport. Created lazily on first render.
+    var drawerRoot = document.getElementById('drawer-root');
+    if (!drawerRoot) {
+      drawerRoot = document.createElement('div');
+      drawerRoot.id = 'drawer-root';
+      document.body.appendChild(drawerRoot);
+    }
+    drawerRoot.innerHTML = drawerHTML(t, activeKey);
+
     // Booking form (homepage) → POST to /api/booking (MailerSend).
     // Falls back to a mailto link if the API isn't configured or errors.
     var bf = main && main.querySelector('#booking-form');
@@ -598,29 +614,29 @@
       });
     }
 
-    if (header) {
-      // Language toggle (present in both header bar and drawer)
-      header.querySelectorAll('[data-lang]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var l = btn.getAttribute('data-lang');
-          if (l === LANG) return;
-          LANG = l;
-          try { localStorage.setItem('mc-lang', l); } catch (e) {}
-          render();
-        });
+    // Header + drawer interactions. Queried at document level because the drawer
+    // now lives in a body-level root, not inside the header element.
+    // Language toggle (present in both header bar and drawer foot)
+    document.querySelectorAll('[data-lang]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var l = btn.getAttribute('data-lang');
+        if (l === LANG) return;
+        LANG = l;
+        try { localStorage.setItem('mc-lang', l); } catch (e) {}
+        render();
       });
-      // Hamburger drawer
-      var toggle = header.querySelector('.menu-toggle');
-      if (toggle) toggle.addEventListener('click', openDrawer);
-      header.querySelectorAll('[data-drawer-close]').forEach(function (el) {
-        el.addEventListener('click', closeDrawer);
-      });
-      // Close after navigating via a drawer link
-      var drawer = header.querySelector('#site-drawer');
-      if (drawer) drawer.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', closeDrawer);
-      });
-    }
+    });
+    // Hamburger drawer
+    var toggle = header && header.querySelector('.menu-toggle');
+    if (toggle) toggle.addEventListener('click', openDrawer);
+    document.querySelectorAll('[data-drawer-close]').forEach(function (el) {
+      el.addEventListener('click', closeDrawer);
+    });
+    // Close after navigating via a drawer link
+    var drawer = document.getElementById('site-drawer');
+    if (drawer) drawer.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', closeDrawer);
+    });
   }
 
   // Global handlers (attached once): Escape closes the drawer; leaving mobile
