@@ -1,0 +1,89 @@
+# moacollin.com
+
+Static site for **Moa Collin** — public speaker & author (relational leadership).
+Built from the *Moa Collin Design System* (Claude Design). Bilingual (SV / EN),
+fully responsive, deployable on **Cloudflare Pages**.
+
+## Structure
+
+```
+index.html        /            Erfarenhet — overview (hero, stats, section hub, CTA)
+karriar.html      /karriar     Career timeline
+kompetens.html    /kompetens   Areas of expertise
+kontakt.html      /kontakt     Contact / booking
+assets/
+  styles.css      Design tokens + components (Logo, Button, Eyebrow, Card, LanguageToggle)
+  app.js          Shared header/footer, bilingual content, SV/EN toggle, mobile drawer
+  moa-portrait.jpg  Social/link-preview image (og:image)
+functions/
+  api/checkout.js Stripe Checkout skeleton (server-side, disabled by default)
+_headers          Cache + security headers
+wrangler.toml     Pages config + non-secret settings
+.dev.vars.example Template for local secrets
+```
+
+Pages share one stylesheet and one script. Each HTML file is a thin shell with
+per-page `<title>` / meta / Open Graph tags (good link previews when shared);
+`app.js` renders the chrome and the page body, and remembers the chosen language
+across pages via `localStorage`.
+
+Clean URLs (`/karriar`) are resolved by Cloudflare Pages automatically.
+
+## Local preview
+
+Clean URLs and the `/api/*` function need a server (not `file://`):
+
+```bash
+npx wrangler pages dev .
+# → http://localhost:8788
+```
+
+For static-only preview, any static server works (e.g. `npx serve .`).
+
+## Deploy to Cloudflare Pages
+
+DNS for `moacollin.com` is already on Cloudflare. Two options:
+
+**A. Git integration (recommended)** — push this folder to a repo, then in the
+Cloudflare dashboard: *Workers & Pages → Create → Pages → Connect to Git*.
+Build command: *(none)*. Output directory: `/`.
+
+**B. Direct upload**
+
+```bash
+npx wrangler pages deploy .
+```
+
+Then map the custom domain (`moacollin.com`) under the Pages project →
+*Custom domains*.
+
+## Environment & settings
+
+Non-secret settings live in `wrangler.toml` under `[vars]`
+(`CONTACT_EMAIL`, `BOOKING_ENABLED`, `CURRENCY`) and in the dashboard.
+
+**Secrets are never committed.** Set them as encrypted Pages environment
+variables (dashboard) or via CLI:
+
+```bash
+npx wrangler pages secret put STRIPE_SECRET_KEY
+npx wrangler pages secret put STRIPE_WEBHOOK_SECRET
+npx wrangler pages secret put STRIPE_PRICE_ID
+```
+
+Locally, copy `.dev.vars.example` → `.dev.vars` (git-ignored) and fill in.
+
+### Stripe (booking) — current state
+
+`functions/api/checkout.js` is a **skeleton, disabled by default**. It returns
+`503` until `BOOKING_ENABLED="true"` and a Stripe secret key + price ID are set.
+When enabled, `POST /api/checkout` creates a Stripe Checkout Session and returns
+its `url`. Wire a "Book"/"Pay" button to it once the offering & pricing are
+decided. Add a webhook handler (`functions/api/webhook.js`) before going live.
+
+## Source of truth
+
+Content & visual design come from the Claude Design project
+*"Moa Collin Design System"* → `templates/experience/Experience.dc.html`.
+That `.dc.html` uses Claude Design's authoring runtime; this repo is the
+deployable plain-HTML/CSS/JS implementation of it.

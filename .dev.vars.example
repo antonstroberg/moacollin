@@ -1,0 +1,10 @@
+# Local development secrets for `wrangler pages dev`.
+# Copy to `.dev.vars` (which is git-ignored) and fill in real values.
+# In production these are set as encrypted Pages environment variables instead.
+
+# Stripe — https://dashboard.stripe.com/apikeys
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+
+# Optional: a Stripe Price ID for the bookable offering
+STRIPE_PRICE_ID=price_xxx

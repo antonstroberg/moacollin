@@ -1,0 +1,21 @@
+# Cloudflare Pages project config
+# Deploy:  npx wrangler pages deploy .
+# Local:   npx wrangler pages dev .   (reads .dev.vars for secrets)
+
+name = "moacollin"
+compatibility_date = "2026-06-23"
+pages_build_output_dir = "."
+
+# ---- Non-secret site settings (safe to commit) ----
+# Available in Functions as env.SETTING_NAME.
+[vars]
+CONTACT_EMAIL = "info@moacollin.com"
+BOOKING_ENABLED = "false"   # flip to "true" once Stripe is wired up
+CURRENCY = "sek"
+
+# ---- Secrets (DO NOT put here) ----
+# Set via dashboard (Settings → Environment variables, mark as "Encrypted")
+# or CLI:
+#   npx wrangler pages secret put STRIPE_SECRET_KEY
+#   npx wrangler pages secret put STRIPE_WEBHOOK_SECRET
+# Locally they come from .dev.vars (git-ignored). See .dev.vars.example.
