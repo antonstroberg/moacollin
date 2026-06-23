@@ -2,3 +2,6 @@
 # Old contact page is now the booking section on the homepage.
 /kontakt        /#boka   301
 /kontakt.html   /#boka   301
+# Career & expertise pages were merged into /erfarenhet.
+/karriar        /erfarenhet   301
+/kompetens      /erfarenhet   301

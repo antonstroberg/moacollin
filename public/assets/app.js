@@ -36,10 +36,10 @@
   var EMAIL = 'info@moacollin.com';
 
   /* ---- Routes (clean, shareable URLs; served by Cloudflare Pages) ---- */
-  var ROUTES = { home: '/', experience: '/erfarenhet', karriar: '/karriar', kompetens: '/kompetens',
+  var ROUTES = { home: '/', experience: '/erfarenhet',
     skola: '/forelasning-skola', foraldrar: '/coaching-foraldrar', bok: '/boken' };
-  // Which top nav item is highlighted on each page (homepage anchors aren't).
-  var PAGE_ACTIVE_NAV = { home: null, experience: 'erfarenhet', karriar: 'erfarenhet', kompetens: 'erfarenhet',
+  // Which nav item is highlighted on each page (homepage anchors aren't).
+  var PAGE_ACTIVE_NAV = { home: null, experience: 'erfarenhet',
     skola: 'skola', foraldrar: 'foraldrar', bok: 'bok' };
   var bookingSent = false; // preserved across re-renders (e.g. language toggle)
 
@@ -631,38 +631,6 @@
         '<section class="section alt"><div class="inner-xl">' +
           '<div class="section-head center big">' + eyebrow(t.expertiseEyebrow) +
             '<h2>' + esc(t.expertiseTitle) + '</h2></div>' +
-          '<div class="grid-cards">' + cards + '</div>' +
-        '</div></section>' +
-        clientsHTML(t) +
-        ctaHTML(t);
-    },
-
-    karriar: function (t) {
-      var rows = t.timeline.map(function (e) {
-        return '<div class="tl-row"><div class="tl-year">' + esc(e.year) + '</div>' +
-          '<div class="tl-body"><span class="tl-dot"></span>' +
-          '<h3>' + esc(e.title) + '</h3><p>' + esc(e.desc) + '</p></div></div>';
-      }).join('');
-      return '<section class="section"><div class="inner-md">' +
-          '<div class="section-head">' + eyebrow(t.timelineEyebrow) +
-            '<h2>' + esc(t.timelineTitle) + '</h2>' +
-            '<p class="lead" style="margin-left:0">' + esc(t.timelineLead) + '</p>' +
-          '</div>' +
-          '<div class="timeline">' + rows + '</div>' +
-        '</div></section>' +
-        ctaHTML(t);
-    },
-
-    kompetens: function (t) {
-      var cards = t.expertise.map(function (x) {
-        return '<div class="card"><span class="accent-edge ' + x.tone + '"></span>' +
-          '<h3>' + esc(x.title) + '</h3><p>' + esc(x.desc) + '</p></div>';
-      }).join('');
-      return '<section class="section alt"><div class="inner-xl">' +
-          '<div class="section-head center big">' + eyebrow(t.expertiseEyebrow) +
-            '<h2>' + esc(t.expertiseTitle) + '</h2>' +
-            '<p class="lead">' + esc(t.expertiseLead) + '</p>' +
-          '</div>' +
           '<div class="grid-cards">' + cards + '</div>' +
         '</div></section>' +
         clientsHTML(t) +
