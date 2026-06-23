@@ -6,12 +6,16 @@ name = "moacollin"
 compatibility_date = "2026-06-23"
 main = "worker.js"
 
+# Local dev server (`npx wrangler dev`) — http://localhost:8080
+[dev]
+port = 8080
+
 # ---- Static site ----
-# The repo root is served as static assets. worker.js, functions/, and the
-# config/secret files are excluded via .assetsignore. The Worker only runs for
-# requests that don't match an asset (i.e. the /api/* routes).
+# Only public/ is served as static assets, so worker.js, functions/, config and
+# secrets are never exposed (and wrangler's file-watcher doesn't loop on its own
+# .wrangler/ writes). The Worker runs only for non-asset requests (the /api/*).
 [assets]
-directory = "."
+directory = "public"
 binding = "ASSETS"
 
 # ---- Non-secret site settings (safe to commit) ----

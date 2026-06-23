@@ -11,3 +11,7 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx
 
 # Optional: a Stripe Price ID for the bookable offering
 STRIPE_PRICE_ID=price_xxx
+
+MAILERSEND_API_TOKEN=mlsn.c184efc9f68df9067b07e9777fbc2c4acd8bf0cf711b0170be3a48af577d678c
+LINKEDIN_URL=https://www.linkedin.com/in/moa-collin-28b654109/
+PORT=8080
