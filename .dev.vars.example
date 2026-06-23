@@ -2,6 +2,9 @@
 # Copy to `.dev.vars` (which is git-ignored) and fill in real values.
 # In production these are set as encrypted Pages environment variables instead.
 
+# MailerSend — booking form email (https://app.mailersend.com/api-tokens)
+MAILERSEND_API_KEY=mlsn.xxx
+
 # Stripe — https://dashboard.stripe.com/apikeys
 STRIPE_SECRET_KEY=sk_test_xxx
 STRIPE_WEBHOOK_SECRET=whsec_xxx

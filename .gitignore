@@ -5,3 +5,6 @@ node_modules/
 
 # OS / editor
 .DS_Store
+
+# Local env (not used by wrangler, but keep secrets out of git)
+.env

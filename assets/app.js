@@ -36,7 +36,10 @@
   var EMAIL = 'info@moacollin.com';
 
   /* ---- Routes (clean, shareable URLs; served by Cloudflare Pages) ---- */
-  var ROUTES = { overview: '/', karriar: '/karriar', kompetens: '/kompetens', kontakt: '/kontakt' };
+  var ROUTES = { home: '/', experience: '/erfarenhet', karriar: '/karriar', kompetens: '/kompetens' };
+  // Which top nav item is highlighted on each page (homepage anchors aren't).
+  var PAGE_ACTIVE_NAV = { home: null, experience: 'erfarenhet', karriar: 'erfarenhet', kompetens: 'erfarenhet' };
+  var bookingSent = false; // preserved across re-renders (e.g. language toggle)
 
   /* ==========================================================================
      Content — Swedish (default) and English
@@ -45,10 +48,10 @@
     sv: {
       htmlLang: 'sv',
       nav: [
-        { key: 'overview', label: 'Erfarenhet' },
-        { key: 'karriar', label: 'Karriär' },
-        { key: 'kompetens', label: 'Kompetensområden' },
-        { key: 'kontakt', label: 'Kontakt' }
+        { key: 'forelasningar', label: 'Föreläsningar', href: '/#forelasningar' },
+        { key: 'erfarenhet', label: 'Erfarenhet', href: '/erfarenhet' },
+        { key: 'bok', label: 'Boken', href: '/#bok' },
+        { key: 'boka', label: 'Kontakt', href: '/#boka' }
       ],
       bookBtn: 'Boka föreläsning',
       readMore: 'Läs mer',
@@ -63,9 +66,9 @@
       ],
       hubLabel: 'Utforska',
       hub: [
-        { key: 'karriar', title: 'Vägen hit', desc: 'En karriär byggd på relationer — från lärarexamen till resursskola och eget företag.', tone: 'brand' },
-        { key: 'kompetens', title: 'Kompetensområden', desc: 'Relationellt ledarskap, elevhälsa, studiero och föräldracoaching.', tone: 'warm' },
-        { key: 'kontakt', title: 'Boka & kontakt', desc: 'Berätta om ert tillfälle så återkommer jag inom 24 timmar.', tone: 'amber' }
+        { href: '/karriar', title: 'Vägen hit', desc: 'En karriär byggd på relationer — från lärarexamen till resursskola och eget företag.', tone: 'brand' },
+        { href: '/kompetens', title: 'Kompetensområden', desc: 'Relationellt ledarskap, elevhälsa, studiero och föräldracoaching.', tone: 'warm' },
+        { href: '/#boka', title: 'Boka & kontakt', desc: 'Berätta om ert tillfälle så återkommer jag inom 24 timmar.', tone: 'amber' }
       ],
 
       timelineEyebrow: 'Vägen hit',
@@ -100,16 +103,53 @@
 
       footTag: 'Relationellt ledarskap för skolor, unga och föräldrar.',
       footContact: 'Kontakt',
-      rights: '© 2026 Moa Collin. Alla rättigheter förbehållna.'
+      rights: '© 2026 Moa Collin. Alla rättigheter förbehållna.',
+
+      home: {
+        heroEyebrow: 'Föreläsare · Coach · Författare',
+        heroA: 'Från stök', heroB: 'till ', heroItalic: 'studiero',
+        heroLead: 'Jag hjälper skolor, unga och föräldrar att bygga relationer som skapar lugn, motivation och lust att lära.',
+        heroPrimary: 'Boka föreläsning', heroSecondary: 'Köp boken',
+        creds: [
+          { year: '1999', label: 'Lärarexamen' },
+          { year: '2011', label: 'Specialpedagog', divider: true },
+          { year: '2016', label: 'Eget företag', divider: true }
+        ],
+        aboutEyebrow: 'Om Moa',
+        aboutTitle: 'Tjugofem år i de svåraste klassrummen',
+        aboutBody: [
+          'Jag är lärare i grunden, specialpedagog sedan 2011, och har arbetat länge med särskilt utmanande elever och elevgrupper — bland annat på resursskola.',
+          'Sedan 2016 driver jag eget och föreläser, handleder och gör interventioner i stökiga klasser. Min övertygelse är enkel: en god relation är början till varje lösning.'
+        ],
+        offerEyebrow: 'Vad jag erbjuder',
+        offerTitle: 'Tre sätt att arbeta tillsammans',
+        cards: [
+          { badge: 'Skola', tone: 'brand', title: 'Föreläsning för skolor', desc: 'Relationellt ledarskap i utmanande grupper — konkreta verktyg för pedagoger och elevhälsa.', cta: 'Läs mer', href: '#forelasningar' },
+          { badge: 'Föräldrar', tone: 'warm', title: 'Coaching för föräldrar', desc: 'Personlig coaching och föreläsningar för dig som är förälder till en ung människa.', cta: 'Läs mer', href: '#boka' },
+          { badge: 'Bok', tone: 'amber', title: 'Boken', desc: 'Från stök till studiero — min handbok om relationellt förhållningssätt.', cta: 'Köp boken', href: '#bok' }
+        ],
+        quote: 'God relation är början till varje lösning.',
+        quoteWho: 'Moa Collin',
+        bookEyebrow: 'Boken', bookKicker: 'Handbok',
+        bookTitle: 'Från stök till studiero',
+        bookBody: 'En praktisk handbok om relationellt ledarskap i klassrummet — för lärare, elevhälsa och föräldrar. Verktyg du kan använda redan imorgon.',
+        bookBullets: ['Check in & check out', 'Konkreta klassrumsverktyg', 'Relationellt förhållningssätt'],
+        bookPrice: '249 kr', bookCta: 'Köp boken',
+        bookCoverA: 'Från stök', bookCoverB: 'till studiero', bookCoverWho: 'Moa Collin',
+        bookingEyebrow: 'Boka', bookingTitle: 'Boka Moa som talare',
+        bookingBody: 'Berätta kort om ert tillfälle så återkommer jag inom 24 timmar.',
+        types: ['Föreläsning – skola', 'Föreläsning – föräldrar', 'Personlig coaching', 'Handledning'],
+        form: { name: 'Namn', email: 'E-post', org: 'Organisation', type: 'Typ av uppdrag', typePlaceholder: 'Välj…', msg: 'Meddelande', msgPlaceholder: 'Berätta om ert tillfälle…', submit: 'Skicka förfrågan', sending: 'Skickar…', sent: 'Tack! Jag återkommer inom 24h.', sentNote: 'Din förfrågan är skickad.', error: 'Något gick fel — mejla mig gärna direkt:' }
+      }
     },
 
     en: {
       htmlLang: 'en',
       nav: [
-        { key: 'overview', label: 'Experience' },
-        { key: 'karriar', label: 'Career' },
-        { key: 'kompetens', label: 'Expertise' },
-        { key: 'kontakt', label: 'Contact' }
+        { key: 'forelasningar', label: 'Talks', href: '/#forelasningar' },
+        { key: 'erfarenhet', label: 'Experience', href: '/erfarenhet' },
+        { key: 'bok', label: 'The book', href: '/#bok' },
+        { key: 'boka', label: 'Contact', href: '/#boka' }
       ],
       bookBtn: 'Book a talk',
       readMore: 'Read more',
@@ -124,9 +164,9 @@
       ],
       hubLabel: 'Explore',
       hub: [
-        { key: 'karriar', title: 'The path here', desc: 'A career built on relationships — from teaching degree to resource school and my own practice.', tone: 'brand' },
-        { key: 'kompetens', title: 'Areas of expertise', desc: 'Relational leadership, student health, classroom calm and parent coaching.', tone: 'warm' },
-        { key: 'kontakt', title: 'Book & contact', desc: 'Tell me about your event and I’ll get back to you within 24 hours.', tone: 'amber' }
+        { href: '/karriar', title: 'The path here', desc: 'A career built on relationships — from teaching degree to resource school and my own practice.', tone: 'brand' },
+        { href: '/kompetens', title: 'Areas of expertise', desc: 'Relational leadership, student health, classroom calm and parent coaching.', tone: 'warm' },
+        { href: '/#boka', title: 'Book & contact', desc: 'Tell me about your event and I’ll get back to you within 24 hours.', tone: 'amber' }
       ],
 
       timelineEyebrow: 'The path here',
@@ -161,18 +201,59 @@
 
       footTag: 'Relational leadership for schools, young people and parents.',
       footContact: 'Contact',
-      rights: '© 2026 Moa Collin. All rights reserved.'
+      rights: '© 2026 Moa Collin. All rights reserved.',
+
+      home: {
+        heroEyebrow: 'Speaker · Coach · Author',
+        heroA: 'From chaos', heroB: 'to ', heroItalic: 'calm',
+        heroLead: 'I help schools, young people and parents build the relationships that create calm, motivation and a genuine desire to learn.',
+        heroPrimary: 'Book a talk', heroSecondary: 'Buy the book',
+        creds: [
+          { year: '1999', label: 'Teaching degree' },
+          { year: '2011', label: 'Special-ed degree', divider: true },
+          { year: '2016', label: 'Own practice', divider: true }
+        ],
+        aboutEyebrow: 'About Moa',
+        aboutTitle: 'Twenty-five years in the toughest classrooms',
+        aboutBody: [
+          'I trained as a teacher, qualified as a special educator in 2011, and have spent years working with the most challenging students and groups — including at a resource school.',
+          'Since 2016 I have run my own practice: speaking, mentoring and running interventions in disruptive classes. My conviction is simple: a good relationship is the beginning of every solution.'
+        ],
+        offerEyebrow: 'What I offer',
+        offerTitle: 'Three ways to work together',
+        cards: [
+          { badge: 'Schools', tone: 'brand', title: 'Talks for schools', desc: 'Relational leadership in challenging groups — concrete tools for teachers and student health teams.', cta: 'Learn more', href: '#forelasningar' },
+          { badge: 'Parents', tone: 'warm', title: 'Coaching for parents', desc: 'Personal coaching and talks for parents of a young person aged 12–16.', cta: 'Learn more', href: '#boka' },
+          { badge: 'Book', tone: 'amber', title: 'The book', desc: 'From chaos to calm — my handbook on the relational approach.', cta: 'Buy the book', href: '#bok' }
+        ],
+        quote: 'A good relationship is the beginning of every solution.',
+        quoteWho: 'Moa Collin',
+        bookEyebrow: 'The book', bookKicker: 'Handbook',
+        bookTitle: 'From chaos to calm',
+        bookBody: 'A practical handbook on relational leadership in the classroom — for teachers, student-health teams and parents. Tools you can use tomorrow.',
+        bookBullets: ['Check in & check out', 'Concrete classroom tools', 'The relational approach'],
+        bookPrice: '€24', bookCta: 'Buy the book',
+        bookCoverA: 'From chaos', bookCoverB: 'to calm', bookCoverWho: 'Moa Collin',
+        bookingEyebrow: 'Booking', bookingTitle: 'Book Moa as a speaker',
+        bookingBody: 'Tell me a little about your event and I’ll get back to you within 24 hours.',
+        types: ['Talk – school', 'Talk – parents', 'Personal coaching', 'Mentoring'],
+        form: { name: 'Name', email: 'Email', org: 'Organisation', type: 'Type of engagement', typePlaceholder: 'Choose…', msg: 'Message', msgPlaceholder: 'Tell me about your event…', submit: 'Send request', sending: 'Sending…', sent: 'Thank you! I’ll reply within 24h.', sentNote: 'Your request has been sent.', error: 'Something went wrong — please email me directly:' }
+      }
     }
   };
 
   /* ==========================================================================
      Renderers
      ========================================================================== */
-  function navHTML(t, page) {
+  function navHTML(t, activeKey) {
     return t.nav.map(function (n) {
-      var cur = n.key === page ? ' aria-current="page"' : '';
-      return '<a href="' + ROUTES[n.key] + '"' + cur + '>' + esc(n.label) + '</a>';
+      var cur = n.key === activeKey ? ' aria-current="page"' : '';
+      return '<a href="' + n.href + '"' + cur + '>' + esc(n.label) + '</a>';
     }).join('');
+  }
+
+  function badge(label, tone) {
+    return '<span class="badge ' + (tone || 'brand') + '">' + esc(label) + '</span>';
   }
 
   var ICON_MENU = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>';
@@ -185,13 +266,13 @@
     '</div>';
   }
 
-  function headerHTML(t, page) {
+  function headerHTML(t, activeKey) {
     return '<div class="bar">' +
       '<a class="brand" href="/" aria-label="Moa Collin">' + logo('ink', 'md') + '</a>' +
-      '<nav class="site-nav" aria-label="Huvudmeny">' + navHTML(t, page) + '</nav>' +
+      '<nav class="site-nav" aria-label="Huvudmeny">' + navHTML(t, activeKey) + '</nav>' +
       '<div class="header-actions">' +
         langToggleHTML('ink') +
-        '<a class="btn btn-primary sm booknav" href="' + ROUTES.kontakt + '">' + esc(t.bookBtn) + '</a>' +
+        '<a class="btn btn-primary sm booknav" href="' + '/#boka' + '">' + esc(t.bookBtn) + '</a>' +
         '<button type="button" class="menu-toggle" aria-label="' + (LANG === 'sv' ? 'Öppna meny' : 'Open menu') + '" aria-expanded="false" aria-controls="site-drawer">' + ICON_MENU + '</button>' +
       '</div>' +
     '</div>' +
@@ -201,10 +282,10 @@
         '<a class="brand" href="/" aria-label="Moa Collin">' + logo('ink', 'md') + '</a>' +
         '<button type="button" class="drawer-close" data-drawer-close aria-label="' + (LANG === 'sv' ? 'Stäng meny' : 'Close menu') + '">' + ICON_CLOSE + '</button>' +
       '</div>' +
-      '<nav class="drawer-nav" aria-label="Mobilmeny">' + navHTML(t, page) + '</nav>' +
+      '<nav class="drawer-nav" aria-label="Mobilmeny">' + navHTML(t, activeKey) + '</nav>' +
       '<div class="drawer-foot">' +
         langToggleHTML('ink') +
-        '<a class="btn btn-primary" href="' + ROUTES.kontakt + '">' + esc(t.bookBtn) + '</a>' +
+        '<a class="btn btn-primary" href="' + '/#boka' + '">' + esc(t.bookBtn) + '</a>' +
       '</div>' +
     '</aside>';
   }
@@ -217,7 +298,7 @@
           '<p>' + esc(t.footTag) + '</p>' +
         '</div>' +
         '<nav class="links" aria-label="Sidfot">' +
-          t.nav.map(function (n) { return '<a href="' + ROUTES[n.key] + '">' + esc(n.label) + '</a>'; }).join('') +
+          t.nav.map(function (n) { return '<a href="' + n.href + '">' + esc(n.label) + '</a>'; }).join('') +
         '</nav>' +
         '<div class="contact">' +
           '<p class="label">' + esc(t.footContact) + '</p>' +
@@ -252,7 +333,7 @@
     return '<section class="cta"><div class="inner">' +
       '<h2>' + esc(t.ctaTitle) + '</h2>' +
       '<p>' + esc(t.ctaBody) + '</p>' +
-      '<a class="btn btn-accent lg" href="' + ROUTES.kontakt + '">' + esc(t.ctaBtn) + '</a>' +
+      '<a class="btn btn-accent lg" href="' + '/#boka' + '">' + esc(t.ctaBtn) + '</a>' +
     '</div></section>';
   }
 
@@ -260,9 +341,9 @@
 
   /* ---- Page bodies ---- */
   var PAGES = {
-    overview: function (t) {
+    experience: function (t) {
       var hub = t.hub.map(function (h) {
-        return '<a class="card link" href="' + ROUTES[h.key] + '">' +
+        return '<a class="card link" href="' + h.href + '">' +
           '<span class="accent-edge ' + h.tone + '"></span>' +
           '<h3>' + esc(h.title) + '</h3><p>' + esc(h.desc) + '</p>' +
           '<span class="more">' + esc(t.readMore) + ' →</span>' +
@@ -314,14 +395,121 @@
         ctaHTML(t);
     },
 
-    kontakt: function (t) {
-      return '<section class="cta"><div class="inner">' +
-          '<h2>' + esc(t.ctaTitle) + '</h2>' +
-          '<p>' + esc(t.ctaBody) + '</p>' +
-          '<a class="btn btn-accent lg" href="mailto:' + EMAIL + '">' + esc(t.ctaBtn) + '</a>' +
-          '<p class="email-line"><a href="mailto:' + EMAIL + '">' + EMAIL + '</a></p>' +
-        '</div></section>' +
-        clientsHTML(t);
+    home: function (t) {
+      var h = t.home;
+      var PORTRAIT = '/assets/moa-portrait.jpg';
+
+      // Hero
+      var hero = '<section class="home-hero"><div class="hh-inner">' +
+          '<div class="hh-copy">' +
+            eyebrow(h.heroEyebrow) +
+            '<h1 class="hh-title">' + esc(h.heroA) + '<br>' + esc(h.heroB) + '<span class="accent">' + esc(h.heroItalic) + '</span></h1>' +
+            '<p class="hh-lead">' + esc(h.heroLead) + '</p>' +
+            '<div class="hh-actions">' +
+              '<a class="btn btn-primary lg" href="#boka">' + esc(h.heroPrimary) + '</a>' +
+              '<a class="btn btn-secondary lg" href="#bok">' + esc(h.heroSecondary) + '</a>' +
+            '</div>' +
+          '</div>' +
+          '<div class="hh-media"><div class="hh-media-bg"></div>' +
+            '<div class="hh-frame"><img src="' + PORTRAIT + '" alt="Moa Collin" loading="eager"></div>' +
+          '</div>' +
+        '</div></section>';
+
+      // Credentials strip
+      var creds = '<div class="statband creds"><div class="inner">' +
+        h.creds.map(function (c) {
+          return '<div class="stat">' + (c.divider ? '<span class="divider"></span>' : '') +
+            '<div class="body"><span class="figure">' + esc(c.year) + '</span>' +
+            '<span class="label">' + esc(c.label) + '</span></div></div>';
+        }).join('') + '</div></div>';
+
+      // About
+      var about = '<section class="section about-sec" id="om"><div class="inner-lg about">' +
+          '<div class="about-media"><img src="' + PORTRAIT + '" alt="Moa Collin" loading="lazy"></div>' +
+          '<div class="about-copy">' + eyebrow(h.aboutEyebrow) +
+            '<h2>' + esc(h.aboutTitle) + '</h2>' +
+            '<p>' + esc(h.aboutBody[0]) + '</p><p>' + esc(h.aboutBody[1]) + '</p>' +
+          '</div>' +
+        '</div></section>';
+
+      // Offerings
+      var offer = '<section class="section alt" id="forelasningar"><div class="inner-xl">' +
+          '<div class="section-head center big">' + eyebrow(h.offerEyebrow) +
+            '<h2>' + esc(h.offerTitle) + '</h2></div>' +
+          '<div class="grid-cards">' +
+            h.cards.map(function (c) {
+              return '<a class="card offer link" href="' + c.href + '">' +
+                '<span class="accent-edge ' + c.tone + '"></span>' +
+                badge(c.badge, c.tone) +
+                '<h3>' + esc(c.title) + '</h3><p>' + esc(c.desc) + '</p>' +
+                '<span class="more">' + esc(c.cta) + ' →</span>' +
+              '</a>';
+            }).join('') +
+          '</div>' +
+        '</div></section>';
+
+      // Quote
+      var quote = '<section class="quote-sec"><div class="inner">' +
+          '<span class="qmark" aria-hidden="true">&ldquo;</span>' +
+          '<p class="quote">' + esc(h.quote) + '</p>' +
+          '<span class="qwho">— ' + esc(h.quoteWho) + '</span>' +
+        '</div></section>';
+
+      // Book
+      var bookMailto = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent((LANG === 'sv' ? 'Beställning: ' : 'Order: ') + h.bookTitle);
+      var book = '<section class="section book-sec" id="bok"><div class="inner-lg book">' +
+          '<div class="book-cover-wrap"><div class="book-cover">' +
+            '<div class="bc-top"><span class="bc-rule"></span>' +
+              '<span class="bc-kicker">' + esc(h.bookKicker) + '</span></div>' +
+            '<div class="bc-title">' + esc(h.bookCoverA) + '<br><em>' + esc(h.bookCoverB) + '</em></div>' +
+            '<span class="bc-who">' + esc(h.bookCoverWho) + '</span>' +
+          '</div></div>' +
+          '<div class="book-copy">' + eyebrow(h.bookEyebrow, 'warm') +
+            '<h2>' + esc(h.bookTitle) + '</h2>' +
+            '<p>' + esc(h.bookBody) + '</p>' +
+            '<ul class="book-bullets">' + h.bookBullets.map(function (b) {
+              return '<li><span class="tick" aria-hidden="true">✓</span>' + esc(b) + '</li>';
+            }).join('') + '</ul>' +
+            '<div class="book-buy"><a class="btn btn-accent lg" href="' + bookMailto + '">' + esc(h.bookCta) + '</a>' +
+              '<span class="price">' + esc(h.bookPrice) + '</span></div>' +
+          '</div>' +
+        '</div></section>';
+
+      // Booking form (or success state)
+      var f = h.form;
+      var inner;
+      if (bookingSent) {
+        inner = '<div class="booking-success"><div class="bs-check" aria-hidden="true">✓</div>' +
+          '<p class="bs-title">' + esc(f.sent) + '</p>' +
+          '<p class="bs-note">' + esc(f.sentNote) + '</p></div>';
+      } else {
+        var typeOpts = '<option value="">' + esc(f.typePlaceholder) + '</option>' +
+          h.types.map(function (ty) { return '<option>' + esc(ty) + '</option>'; }).join('');
+        inner = '<form id="booking-form" class="booking-form" novalidate>' +
+            '<div class="field"><label for="bf-name">' + esc(f.name) + ' <span class="req">*</span></label>' +
+              '<input id="bf-name" name="name" class="control" required></div>' +
+            '<div class="field"><label for="bf-email">' + esc(f.email) + ' <span class="req">*</span></label>' +
+              '<input id="bf-email" name="email" type="email" class="control" required></div>' +
+            '<div class="field"><label for="bf-org">' + esc(f.org) + '</label>' +
+              '<input id="bf-org" name="org" class="control"></div>' +
+            '<div class="field"><label for="bf-type">' + esc(f.type) + '</label>' +
+              '<div class="select-wrap"><select id="bf-type" name="type" class="control">' + typeOpts + '</select>' +
+              '<span class="chev" aria-hidden="true">▼</span></div></div>' +
+            '<div class="field span2"><label for="bf-msg">' + esc(f.msg) + '</label>' +
+              '<textarea id="bf-msg" name="msg" rows="4" class="control" placeholder="' + esc(f.msgPlaceholder) + '"></textarea></div>' +
+            '<input type="text" name="company_url" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+            '<div class="span2 form-error" id="bf-error" role="alert" hidden></div>' +
+            '<div class="span2"><button type="submit" class="btn btn-primary lg" style="width:100%">' + esc(f.submit) + '</button></div>' +
+          '</form>';
+      }
+      var booking = '<section class="section alt" id="boka"><div class="inner-md">' +
+          '<div class="section-head center"><div class="center-eyebrow">' + eyebrow(h.bookingEyebrow) + '</div>' +
+            '<h2>' + esc(h.bookingTitle) + '</h2>' +
+            '<p class="lead">' + esc(h.bookingBody) + '</p></div>' +
+          '<div class="card booking-card">' + inner + '</div>' +
+        '</div></section>';
+
+      return hero + creds + about + offer + quote + book + booking;
     }
   };
 
@@ -357,15 +545,58 @@
 
   function render() {
     var t = I18N[LANG];
-    var page = document.body.getAttribute('data-page') || 'overview';
+    var page = document.body.getAttribute('data-page') || 'home';
+    var activeKey = PAGE_ACTIVE_NAV[page];
     document.documentElement.lang = t.htmlLang;
 
     var header = document.getElementById('site-header');
     var main = document.getElementById('app');
     var footer = document.getElementById('site-footer');
-    if (header) header.innerHTML = headerHTML(t, page);
+    if (header) header.innerHTML = headerHTML(t, activeKey);
     if (main && PAGES[page]) main.innerHTML = PAGES[page](t);
     if (footer) footer.innerHTML = footerHTML(t);
+
+    // Booking form (homepage) → POST to /api/booking (MailerSend).
+    // Falls back to a mailto link if the API isn't configured or errors.
+    var bf = main && main.querySelector('#booking-form');
+    if (bf) {
+      bf.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (bf.reportValidity && !bf.reportValidity()) return;
+
+        var f = I18N[LANG].home.form;
+        var g = function (n) { var el = bf.querySelector('[name="' + n + '"]'); return el ? el.value.trim() : ''; };
+        var btn = bf.querySelector('button[type="submit"]');
+        var errBox = bf.querySelector('#bf-error');
+        var origLabel = btn.textContent;
+
+        errBox.hidden = true;
+        btn.disabled = true;
+        btn.textContent = f.sending;
+
+        var payload = {
+          name: g('name'), email: g('email'), org: g('org'),
+          type: g('type'), msg: g('msg'), company_url: g('company_url'), lang: LANG
+        };
+
+        var fail = function () {
+          btn.disabled = false;
+          btn.textContent = origLabel;
+          var sub = encodeURIComponent((LANG === 'sv' ? 'Bokningsförfrågan' : 'Booking request') + (g('name') ? ' – ' + g('name') : ''));
+          errBox.innerHTML = esc(f.error) + ' <a href="mailto:' + EMAIL + '?subject=' + sub + '">' + EMAIL + '</a>';
+          errBox.hidden = false;
+        };
+
+        fetch('/api/booking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function (res) {
+          if (res.ok) { bookingSent = true; render(); }
+          else fail();
+        }).catch(fail);
+      });
+    }
 
     if (header) {
       // Language toggle (present in both header bar and drawer)

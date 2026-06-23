@@ -1,0 +1,15 @@
+# Files that must NOT be uploaded/served as public static assets.
+# (gitignore-style syntax). _headers and _redirects are intentionally NOT
+# listed — the assets runtime consumes them as config, it does not serve them.
+.git
+.wrangler
+node_modules
+.gitignore
+.assetsignore
+.dev.vars
+.dev.vars.example
+.env
+README.md
+wrangler.toml
+worker.js
+functions

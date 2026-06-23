@@ -7,6 +7,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=()
 
-# Long-cache fingerprint-free static assets (bust by renaming on change)
+# Assets are unversioned, so always revalidate (returns 304 when unchanged).
+# Prevents stale CSS/JS after a deploy. Raise max-age once the site is stable.
 /assets/*
-  Cache-Control: public, max-age=3600, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate

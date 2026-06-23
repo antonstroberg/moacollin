@@ -1,21 +1,32 @@
-# Cloudflare Pages project config
-# Deploy:  npx wrangler pages deploy .
-# Local:   npx wrangler pages dev .   (reads .dev.vars for secrets)
+# Cloudflare Worker (static assets + API routes) config
+# Deploy:  npx wrangler deploy
+# Local:   npx wrangler dev   (reads .dev.vars for secrets)
 
 name = "moacollin"
 compatibility_date = "2026-06-23"
-pages_build_output_dir = "."
+main = "worker.js"
+
+# ---- Static site ----
+# The repo root is served as static assets. worker.js, functions/, and the
+# config/secret files are excluded via .assetsignore. The Worker only runs for
+# requests that don't match an asset (i.e. the /api/* routes).
+[assets]
+directory = "."
+binding = "ASSETS"
 
 # ---- Non-secret site settings (safe to commit) ----
-# Available in Functions as env.SETTING_NAME.
+# Available in the Worker as env.SETTING_NAME.
 [vars]
-CONTACT_EMAIL = "info@moacollin.com"
+CONTACT_EMAIL = "info@moacollin.com"   # booking form recipient
+MAIL_FROM = "noreply@moacollin.com"    # must be a sender on a MailerSend-verified domain
+MAIL_FROM_NAME = "Moa Collin – webb"
 BOOKING_ENABLED = "false"   # flip to "true" once Stripe is wired up
 CURRENCY = "sek"
 
 # ---- Secrets (DO NOT put here) ----
-# Set via dashboard (Settings → Environment variables, mark as "Encrypted")
+# Set via dashboard (Settings → Variables and Secrets → mark as "Secret")
 # or CLI:
-#   npx wrangler pages secret put STRIPE_SECRET_KEY
-#   npx wrangler pages secret put STRIPE_WEBHOOK_SECRET
+#   npx wrangler secret put MAILERSEND_API_KEY    # booking form email
+#   npx wrangler secret put STRIPE_SECRET_KEY
+#   npx wrangler secret put STRIPE_WEBHOOK_SECRET
 # Locally they come from .dev.vars (git-ignored). See .dev.vars.example.
