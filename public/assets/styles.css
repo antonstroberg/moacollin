@@ -248,6 +248,14 @@ body.drawer-open { overflow: hidden; }
 .stat .figure { font-family: var(--font-display); font-size: clamp(2rem,3.5vw,3rem); font-weight: 500; line-height: 1; color: var(--text-brand); letter-spacing: var(--tracking-snug); }
 .stat .label { font-family: var(--font-sans); font-size: var(--text-xs); font-weight: 700; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--text-tertiary); }
 
+/* Keep all three stats on a single row on phones (otherwise they wrap 2+1). */
+@media (max-width: 600px) {
+  .statband .inner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+  .stat { gap: clamp(0.4rem, 2vw, 0.9rem); justify-content: center; }
+  .stat .figure { font-size: clamp(1.3rem, 6vw, 1.9rem); }
+  .stat .label { font-size: 0.58rem; letter-spacing: 0.05em; }
+}
+
 .section { background: var(--surface-page); }
 .section.alt { background: var(--surface-alt); }
 .section .inner-md { max-width: var(--container-md); margin: 0 auto; padding: clamp(3.5rem,7vw,6rem) var(--gutter); }
