@@ -1,3 +1,10 @@
-# Local development secrets for `wrangler pages dev`.
+# Local development secrets for `npx wrangler dev`.
 # Copy to `.dev.vars` (which is git-ignored) and fill in real values.
-# In production these are set as encrypted Pages environment variables instead.
+# Values here override [vars] in wrangler.toml locally, so use Stripe TEST keys.
+# In production the secrets are set with `npx wrangler secret put …` instead.
+
+MAILERSEND_API_KEY=
+
+STRIPE_SECRET_KEY=sk_test_
+# From `stripe listen --forward-to localhost:8080/api/stripe-webhook`
+STRIPE_WEBHOOK_SECRET=whsec_

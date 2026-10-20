@@ -34,6 +34,9 @@
     });
   }
   var EMAIL = 'info@moacollin.com';
+  // Stripe Payment Link for the book pre-order (price, shipping and quantity are
+  // set on the link in the Stripe dashboard).
+  var BOOK_PAYMENT_LINK = 'https://buy.stripe.com/fZubJ285t4xy7yma6X3cc00';
 
   /* ---- Routes (clean, shareable URLs; served by Cloudflare Pages) ---- */
   var ROUTES = { home: '/', experience: '/erfarenhet',
@@ -42,6 +45,10 @@
   var PAGE_ACTIVE_NAV = { home: null, experience: 'erfarenhet',
     skola: 'skola', foraldrar: 'foraldrar', bok: 'bok' };
   var bookingSent = false; // preserved across re-renders (e.g. language toggle)
+  // The Stripe Payment Link redirects back to /boken?order=success. Read it once, then
+  // drop it from the URL so a reload or shared link doesn't repeat the thank-you.
+  var orderSuccess = /[?&]order=success(&|$)/.test(location.search);
+  if (orderSuccess && history.replaceState) history.replaceState(null, '', location.pathname + location.hash);
 
   /* ==========================================================================
      Content — Swedish (default) and English
@@ -179,7 +186,7 @@
         heroEyebrow: 'Föreläsare · Coach · Författare',
         heroA: 'Från stök', heroB: 'till ', heroItalic: 'studiero',
         heroLead: 'Jag hjälper skolor, unga och föräldrar att bygga relationer som skapar lugn, motivation och lust att lära.',
-        heroPrimary: 'Boka föreläsning', heroSecondary: 'Köp boken',
+        heroPrimary: 'Boka föreläsning', heroSecondary: 'Förbeställ boken',
         creds: [
           { year: '1999', label: 'Lärarexamen' },
           { year: '2011', label: 'Specialpedagog', divider: true },
@@ -204,7 +211,10 @@
         bookTitle: 'Från stök till studiero',
         bookBody: 'En praktisk handbok om relationellt ledarskap i klassrummet — för lärare, elevhälsa och föräldrar. Verktyg du kan använda redan imorgon.',
         bookBullets: ['Check in & check out', 'Konkreta klassrumsverktyg', 'Relationellt förhållningssätt'],
-        bookPrice: '249 kr', bookCta: 'Köp boken',
+        bookPrice: '125 kr', bookPriceWas: '249 kr', bookCta: 'Förbeställ boken',
+        bookNote: 'Förbeställningspris — boken släpps i december 2026.',
+        bookThanksTitle: 'Tack för din förbeställning!',
+        bookThanksNote: 'Kvittot skickas till din e-post. Boken skickas till dig när den släpps i december 2026.',
         bookCoverA: 'Från stök', bookCoverB: 'till studiero', bookCoverWho: 'Moa Collin',
         bookingEyebrow: 'Boka', bookingTitle: 'Boka Moa som talare',
         bookingBody: 'Berätta kort om ert tillfälle så återkommer jag inom 24 timmar.',
@@ -345,7 +355,7 @@
         heroEyebrow: 'Speaker · Coach · Author',
         heroA: 'From chaos', heroB: 'to ', heroItalic: 'calm',
         heroLead: 'I help schools, young people and parents build the relationships that create calm, motivation and a genuine desire to learn.',
-        heroPrimary: 'Book a talk', heroSecondary: 'Buy the book',
+        heroPrimary: 'Book a talk', heroSecondary: 'Pre-order the book',
         creds: [
           { year: '1999', label: 'Teaching degree' },
           { year: '2011', label: 'Special-ed degree', divider: true },
@@ -370,7 +380,10 @@
         bookTitle: 'From chaos to calm',
         bookBody: 'A practical handbook on relational leadership in the classroom — for teachers, student-health teams and parents. Tools you can use tomorrow.',
         bookBullets: ['Check in & check out', 'Concrete classroom tools', 'The relational approach'],
-        bookPrice: '€24', bookCta: 'Buy the book',
+        bookPrice: 'SEK 125', bookPriceWas: 'SEK 249', bookCta: 'Pre-order the book',
+        bookNote: 'Pre-order price — the book comes out in December 2026.',
+        bookThanksTitle: 'Thank you for your pre-order!',
+        bookThanksNote: 'Your receipt is on its way by email. The book will be sent to you when it comes out in December 2026.',
         bookCoverA: 'From chaos', bookCoverB: 'to calm', bookCoverWho: 'Moa Collin',
         bookingEyebrow: 'Booking', bookingTitle: 'Book Moa as a speaker',
         bookingBody: 'Tell me a little about your event and I’ll get back to you within 24 hours.',
@@ -483,8 +496,17 @@
   function eyebrow(text, cls) { return '<span class="eyebrow ' + (cls || '') + '">' + esc(text) + '</span>'; }
 
   // Book section — shared by the homepage and the dedicated /boken page.
-  function bookMailtoURL(t) {
-    return 'mailto:' + EMAIL + '?subject=' + encodeURIComponent((LANG === 'sv' ? 'Beställning: ' : 'Order: ') + t.home.bookTitle);
+  function bookBuyHTML(t) {
+    var h = t.home;
+    return '<div class="book-buy"><a class="btn btn-accent lg" href="' + BOOK_PAYMENT_LINK + '?locale=' + LANG + '">' + esc(h.bookCta) + '</a>' +
+      '<span class="price">' + esc(h.bookPrice) + '</span>' +
+      '<s class="price-was">' + esc(h.bookPriceWas) + '</s>' +
+      '<span class="book-note">' + esc(h.bookNote) + '</span></div>';
+  }
+  function bookThanksHTML(h) {
+    return '<div class="book-thanks" role="status"><span class="bt-check" aria-hidden="true">✓</span>' +
+      '<div><p class="bt-title">' + esc(h.bookThanksTitle) + '</p>' +
+      '<p class="bt-note">' + esc(h.bookThanksNote) + '</p></div></div>';
   }
   function bookCoverHTML(h) {
     return '<div class="book-cover">' +
@@ -504,8 +526,7 @@
           '<ul class="book-bullets">' + h.bookBullets.map(function (b) {
             return '<li><span class="tick" aria-hidden="true">✓</span>' + esc(b) + '</li>';
           }).join('') + '</ul>' +
-          '<div class="book-buy"><a class="btn btn-accent lg" href="' + bookMailtoURL(t) + '">' + esc(h.bookCta) + '</a>' +
-            '<span class="price">' + esc(h.bookPrice) + '</span></div>' +
+          bookBuyHTML(t) +
         '</div>' +
       '</div></section>';
   }
@@ -565,9 +586,8 @@
 
   // Dedicated book page: cover + buy hero, numbered chapters, quote, "for whom".
   function bookPageHTML(t) {
-    var h = t.home; var s = t.subpages.bok; var buy = bookMailtoURL(t);
-    var priceBlock = '<div class="book-buy"><a class="btn btn-accent lg" href="' + buy + '">' + esc(h.bookCta) + '</a>' +
-      '<span class="price">' + esc(h.bookPrice) + '</span></div>';
+    var h = t.home; var s = t.subpages.bok;
+    var priceBlock = bookBuyHTML(t);
 
     var hero = '<section class="hero book-hero"><div class="inner split">' +
         '<div class="book-cover-wrap">' + bookCoverHTML(h) + '</div>' +
@@ -575,7 +595,7 @@
           badge(s.badge, s.badgeTone) +
           '<h1>' + esc(h.bookTitle) + '</h1>' +
           '<p class="lead">' + esc(s.lead) + '</p>' +
-          priceBlock +
+          (orderSuccess ? bookThanksHTML(h) : priceBlock) +
         '</div>' +
       '</div></section>';
 

@@ -24,13 +24,15 @@ binding = "ASSETS"
 CONTACT_EMAIL = "info@moacollin.com"   # booking form recipient
 MAIL_FROM = "noreply@moacollin.com"    # must be a sender on a MailerSend-verified domain
 MAIL_FROM_NAME = "Moa Collin – webb"
-BOOKING_ENABLED = "false"   # flip to "true" once Stripe is wired up
-CURRENCY = "sek"
+# Book pre-orders go through a Stripe Payment Link (URL in public/assets/app.js).
+# Optional: only email orders from this link (plink_…). Empty = every paid
+# Checkout on the Stripe account.
+STRIPE_PAYMENT_LINK_ID = ""
 
 # ---- Secrets (DO NOT put here) ----
 # Set via dashboard (Settings → Variables and Secrets → mark as "Secret")
 # or CLI:
 #   npx wrangler secret put MAILERSEND_API_KEY    # booking form email
-#   npx wrangler secret put STRIPE_SECRET_KEY
-#   npx wrangler secret put STRIPE_WEBHOOK_SECRET
+#   npx wrangler secret put STRIPE_SECRET_KEY     # webhook looks up order quantity
+#   npx wrangler secret put STRIPE_WEBHOOK_SECRET # /api/stripe-webhook order emails
 # Locally they come from .dev.vars (git-ignored). See .dev.vars.example.

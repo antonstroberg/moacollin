@@ -72,15 +72,15 @@ Then map the custom domain (`moacollin.com`) under the Pages project →
 ## Environment & settings
 
 Non-secret settings live in `wrangler.toml` under `[vars]`
-(`CONTACT_EMAIL`, `BOOKING_ENABLED`, `CURRENCY`) and in the dashboard.
+(`CONTACT_EMAIL`, `MAIL_FROM`, `STRIPE_PAYMENT_LINK_ID`, …) and in the dashboard.
 
-**Secrets are never committed.** Set them as encrypted Pages environment
-variables (dashboard) or via CLI:
+**Secrets are never committed.** Set them as encrypted Worker secrets
+(dashboard → Settings → Variables and Secrets) or via CLI:
 
 ```bash
-npx wrangler pages secret put STRIPE_SECRET_KEY
-npx wrangler pages secret put STRIPE_WEBHOOK_SECRET
-npx wrangler pages secret put STRIPE_PRICE_ID
+npx wrangler secret put MAILERSEND_API_KEY
+npx wrangler secret put STRIPE_SECRET_KEY
+npx wrangler secret put STRIPE_WEBHOOK_SECRET
 ```
 
 Locally, copy `.dev.vars.example` → `.dev.vars` (git-ignored) and fill in.
@@ -102,13 +102,38 @@ Locally, copy `.dev.vars.example` → `.dev.vars` (git-ignored) and fill in.
 Until the key + verified sender exist, the endpoint returns `503` and the form
 shows an inline "email me directly" `mailto:` fallback — nothing breaks.
 
-### Stripe (booking) — current state
+### Book pre-order (Stripe Payment Link)
 
-`functions/api/checkout.js` is a **skeleton, disabled by default**. It returns
-`503` until `BOOKING_ENABLED="true"` and a Stripe secret key + price ID are set.
-When enabled, `POST /api/checkout` creates a Stripe Checkout Session and returns
-its `url`. Wire a "Book"/"Pay" button to it once the offering & pricing are
-decided. Add a webhook handler (`functions/api/webhook.js`) before going live.
+The "Förbeställ boken" button links straight to a Stripe Payment Link
+(`BOOK_PAYMENT_LINK` in `assets/app.js`, with `?locale=sv|en`). Price, quantity,
+shipping address and the text on the payment page are all set on the link in the
+Stripe dashboard — no keys are needed for buying to work.
+
+After paying, Stripe should redirect to `https://moacollin.com/boken?order=success`,
+which shows a thank-you on the book page. Set this on the link: *Payment Links →
+the link → Edit → After payment → Don't show confirmation page → redirect*.
+
+Paid orders can also hit `/api/stripe-webhook` (`functions/api/stripe-webhook.js`),
+which verifies the Stripe signature and emails the order (buyer, quantity,
+shipping address) to `CONTACT_EMAIL` via MailerSend. Without it, every order is
+still in the Stripe dashboard under *Payments*. To turn it on:
+
+1. *Developers → Webhooks*: add `https://moacollin.com/api/stripe-webhook` with
+   the events `checkout.session.completed` and
+   `checkout.session.async_payment_succeeded` → copy the signing secret.
+2. `npx wrangler secret put STRIPE_WEBHOOK_SECRET` and
+   `npx wrangler secret put STRIPE_SECRET_KEY` (a restricted key with read access
+   to Checkout Sessions is enough — it's used to look up the quantity).
+3. Optional: set `STRIPE_PAYMENT_LINK_ID` (`plink_…`) in `wrangler.toml` so only
+   book orders are emailed if the account sells other things later.
+
+Pre-orders are charged at checkout (card authorisations expire after a week, so
+holding the payment until December isn't an option).
+
+**Testing the webhook locally:** put Stripe *test* keys in `.dev.vars` (see
+`.dev.vars.example`), run `npx wrangler dev`, and in another terminal
+`stripe listen --forward-to localhost:8080/api/stripe-webhook` — it prints the
+`whsec_…` to use as `STRIPE_WEBHOOK_SECRET`. Then `stripe trigger checkout.session.completed`.
 
 ## Source of truth
 

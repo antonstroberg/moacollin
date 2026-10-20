@@ -1,4 +1,4 @@
-// Cloudflare Worker entry — static assets + two API routes.
+// Cloudflare Worker entry — static assets + API routes.
 //
 // The site is served from the static assets in this repo (see [assets] in
 // wrangler.toml). This Worker only runs for requests that don't match a static
@@ -9,7 +9,7 @@
 // take a `{ request, env }` context, so we call them directly.
 
 import { onRequestPost as booking } from './functions/api/booking.js';
-import { onRequestPost as checkout } from './functions/api/checkout.js';
+import { onRequestPost as stripeWebhook } from './functions/api/stripe-webhook.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -19,9 +19,9 @@ export default {
       if (request.method !== 'POST') return methodNotAllowed();
       return booking({ request, env, ctx });
     }
-    if (url.pathname === '/api/checkout') {
+    if (url.pathname === '/api/stripe-webhook') {
       if (request.method !== 'POST') return methodNotAllowed();
-      return checkout({ request, env, ctx });
+      return stripeWebhook({ request, env, ctx });
     }
 
     // Not an API route — let the static assets binding serve it (handles

@@ -388,6 +388,14 @@ body.drawer-open { overflow: hidden; }
 .book-bullets .tick { width: 20px; height: 20px; border-radius: 50%; background: var(--pine-soft); color: var(--pine-deep); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex: none; }
 .book-buy { display: flex; align-items: center; gap: 1.3rem; flex-wrap: wrap; }
 .book-buy .price { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--text-primary); font-weight: 500; }
+.book-buy .price-was { font-family: var(--font-display); font-size: var(--text-lg); color: var(--text-tertiary); margin-left: -0.5rem; }
+.book-buy .book-note { flex-basis: 100%; margin-top: -0.4rem; font-family: var(--font-sans); font-size: var(--text-sm); color: var(--text-tertiary); }
+.cta-actions .book-buy { justify-content: center; }
+.cta-actions .book-note { text-align: center; }
+.book-thanks { display: flex; align-items: flex-start; gap: 0.9rem; margin-top: 2rem; padding: 1.1rem 1.3rem; border-radius: var(--radius-md); background: var(--pine-soft); max-width: 52ch; }
+.book-thanks .bt-check { width: 28px; height: 28px; border-radius: 50%; background: var(--pine-deep); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex: none; }
+.book-thanks .bt-title { font-family: var(--font-display); font-size: var(--text-lg); color: var(--text-primary); margin: 0 0 0.25rem; }
+.book-thanks .bt-note { font-family: var(--font-sans); font-size: var(--text-sm); color: var(--text-secondary); margin: 0; }
 
 /* Booking form */
 .center-eyebrow { display: flex; justify-content: center; }
