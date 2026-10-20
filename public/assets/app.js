@@ -645,7 +645,7 @@
 
     home: function (t) {
       var h = t.home;
-      var PORTRAIT = '/assets/moa-portrait.jpg';
+      var PORTRAIT = '/assets/moa.webp';
 
       // Hero
       var hero = '<section class="home-hero"><div class="hh-inner">' +

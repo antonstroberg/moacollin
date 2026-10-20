@@ -16,7 +16,7 @@ assets/
                   Badge, Field/Input/Select/Textarea)
   app.js          Shared header/footer, bilingual content, SV/EN toggle, mobile drawer,
                   page renderers, booking form (mailto)
-  moa-portrait.jpg  Portrait — hero/About image + social link-preview (og:image)
+  moa.webp          Portrait — hero/About image + structured-data (JSON-LD) image
 functions/
   api/booking.js  Booking form → MailerSend email (server-side)
   api/checkout.js Stripe Checkout skeleton (server-side, disabled by default)
