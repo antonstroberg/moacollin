@@ -201,7 +201,7 @@
         offerEyebrow: 'Vad jag erbjuder',
         offerTitle: 'Tre sätt att arbeta tillsammans',
         cards: [
-          { badge: 'Skola', tone: 'brand', title: 'Föreläsning för skolor', desc: 'Relationellt ledarskap i utmanande grupper — konkreta verktyg för pedagoger och elevhälsa.', cta: 'Läs mer', href: '/forelasning-skola' },
+          { badge: 'Skola', tone: 'brand', title: 'Föreläsning för skolor', desc: 'Relationellt ledarskap i utmanande grupper — konkreta verktyg för pedagoger och elevhälsa.', extraLabel: 'Handledande arbete', extra: ['Observation och vägledning för att stärka det pedagogiska ledarskapet.', 'Handledning till elevhälsoteam för ett bättre och mer riktat elevhälsoarbete.'], cta: 'Läs mer', href: '/forelasning-skola' },
           { badge: 'Föräldrar', tone: 'warm', title: 'Coaching för föräldrar', desc: 'Personlig coaching och föreläsningar för dig som är förälder till en ung människa.', cta: 'Läs mer', href: '/coaching-foraldrar' },
           { badge: 'Bok', tone: 'amber', title: 'Boken', desc: 'Från stök till studiero — min handbok om relationellt förhållningssätt.', cta: 'Läs mer', href: '/boken' }
         ],
@@ -370,7 +370,7 @@
         offerEyebrow: 'What I offer',
         offerTitle: 'Three ways to work together',
         cards: [
-          { badge: 'Schools', tone: 'brand', title: 'Talks for schools', desc: 'Relational leadership in challenging groups — concrete tools for teachers and student health teams.', cta: 'Learn more', href: '/forelasning-skola' },
+          { badge: 'Schools', tone: 'brand', title: 'Talks for schools', desc: 'Relational leadership in challenging groups — concrete tools for teachers and student health teams.', extraLabel: 'Mentoring', extra: ['Observation and guidance to strengthen pedagogical leadership.', 'Mentoring for student health teams, for better and more targeted student health work.'], cta: 'Learn more', href: '/forelasning-skola' },
           { badge: 'Parents', tone: 'warm', title: 'Coaching for parents', desc: 'Personal coaching and talks for parents of a young person aged 12–16.', cta: 'Learn more', href: '/coaching-foraldrar' },
           { badge: 'Book', tone: 'amber', title: 'The book', desc: 'From chaos to calm — my handbook on the relational approach.', cta: 'Learn more', href: '/boken' }
         ],
@@ -710,6 +710,8 @@
                 '<span class="accent-edge ' + c.tone + '"></span>' +
                 badge(c.badge, c.tone) +
                 '<h3>' + esc(c.title) + '</h3><p>' + esc(c.desc) + '</p>' +
+                (c.extra ? '<p class="extra-label">' + esc(c.extraLabel) + '</p>' +
+                  '<ul class="extra-list">' + c.extra.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
                 '<span class="more">' + esc(c.cta) + ' →</span>' +
               '</a>';
             }).join('') +
